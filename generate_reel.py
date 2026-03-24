@@ -83,48 +83,52 @@ def find_images():
 IMAGES = find_images()
 
 # === スライド定義 ===
-# 接待重視: 接客→接客→接客+料理→料理→接客→接客(クロージング)
+# 接待重視構成 + ミシュラン訴求 + 店舗情報
 # Ken Burns: (start_scale, end_scale, start_x_off, start_y_off, end_x_off, end_y_off)
 SLIDES = [
-    # --- Slide 1: フック / 接客シーン ---
+    # --- Slide 1: フック / ミシュラン訴求 + 店名 ---
     {
         "image": "service1",
-        "duration": 4.0,
+        "duration": 4.5,
         "focus_y": 0.35,
         "kb": (1.0, 1.08, 0.0, 0.02, -0.015, -0.01),
         "texts": [
-            {"text": "大嵓埜", "y": 0.52, "size": 130, "weight": "black",
-             "color": (245, 240, 232), "spacing": 24, "delay": 0.3, "fade": 0.9},
+            {"text": "ミシュランガイド掲載", "y": 0.44, "size": 32, "weight": "light",
+             "color": (220, 195, 145, 210), "spacing": 8, "delay": 0.2, "fade": 0.7},
+            {"text": "北新地  大嵓埜", "y": 0.51, "size": 120, "weight": "black",
+             "color": (245, 240, 232), "spacing": 16, "delay": 0.5, "fade": 0.9},
             {"text": "心をつなぐ、至福のひととき", "y": 0.65, "size": 38, "weight": "light",
-             "color": (245, 240, 232, 180), "spacing": 5, "delay": 1.0, "fade": 0.9},
+             "color": (245, 240, 232, 180), "spacing": 5, "delay": 1.2, "fade": 0.9},
         ],
-        "line": {"y": 0.625, "width": 140, "delay": 0.8, "fade": 1.0},
+        "line": {"y": 0.625, "width": 140, "delay": 1.0, "fade": 1.0},
     },
-    # --- Slide 2: おもてなしの心 / 接客シーン ---
+    # --- Slide 2: コンセプト「和啓清寂」 / 接客シーン ---
     {
         "image": "service2",
-        "duration": 4.5,
+        "duration": 4.8,
         "focus_y": 0.38,
         "kb": (1.06, 1.0, 0.01, -0.01, -0.005, 0.015),
         "texts": [
-            {"text": "一期一会の", "y": 0.28, "size": 64, "weight": "semibold",
-             "color": (245, 240, 232, 235), "spacing": 12, "delay": 0.5, "fade": 1.0},
-            {"text": "おもてなし", "y": 0.365, "size": 64, "weight": "semibold",
-             "color": (245, 240, 232, 235), "spacing": 12, "delay": 0.9, "fade": 1.0},
+            {"text": "和 啓 清 寂", "y": 0.28, "size": 72, "weight": "bold",
+             "color": (200, 175, 130, 240), "spacing": 8, "delay": 0.4, "fade": 1.0},
+            {"text": "一期一会の", "y": 0.39, "size": 56, "weight": "medium",
+             "color": (245, 240, 232, 230), "spacing": 10, "delay": 0.9, "fade": 1.0},
+            {"text": "おもてなし", "y": 0.465, "size": 56, "weight": "medium",
+             "color": (245, 240, 232, 230), "spacing": 10, "delay": 1.2, "fade": 1.0},
         ],
-        "line": {"y": 0.335, "width": 100, "delay": 0.7, "fade": 1.2},
+        "line": {"y": 0.365, "width": 100, "delay": 0.7, "fade": 1.2},
     },
-    # --- Slide 3: 接待の空間 / 接客シーン(別アングル) ---
+    # --- Slide 3: 接待の空間 / 接客シーン ---
     {
         "image": "service1",
         "duration": 4.8,
         "focus_y": 0.50,
         "kb": (1.04, 1.0, -0.02, 0.01, 0.01, -0.005),
-        "brightness": 0.70,
+        "brightness": 0.68,
         "texts": [
-            {"text": "大切なお客様を", "y": 0.38, "size": 56, "weight": "medium",
+            {"text": "大切なお客様を", "y": 0.37, "size": 58, "weight": "medium",
              "color": (245, 240, 232, 230), "spacing": 8, "delay": 0.4, "fade": 0.9},
-            {"text": "大切な場所で", "y": 0.455, "size": 56, "weight": "medium",
+            {"text": "大切な場所で", "y": 0.45, "size": 58, "weight": "medium",
              "color": (245, 240, 232, 230), "spacing": 8, "delay": 0.8, "fade": 0.9},
             {"text": "完全個室のプライベート空間", "y": 0.55, "size": 30, "weight": "light",
              "color": (200, 185, 150, 170), "spacing": 4, "delay": 1.5, "fade": 0.8},
@@ -160,22 +164,28 @@ SLIDES = [
              "color": (245, 240, 232), "spacing": 10, "delay": 0.8, "fade": 0.9},
         ],
     },
-    # --- Slide 6: 接客でクロージング ---
+    # --- Slide 6: クロージング / 店舗情報 + ミシュラン再訴求 ---
     {
         "image": "service2",
-        "duration": 4.8,
+        "duration": 5.5,
         "focus_y": 0.35,
         "kb": (1.04, 1.0, 0.005, -0.005, 0.0, 0.0),
-        "brightness": 0.52,
+        "brightness": 0.48,
         "texts": [
-            {"text": "大嵓埜", "y": 0.40, "size": 140, "weight": "black",
-             "color": (200, 170, 120), "spacing": 32, "delay": 0.3, "fade": 1.0},
-            {"text": "ご予約承ります", "y": 0.55, "size": 36, "weight": "light",
-             "color": (245, 240, 232, 160), "spacing": 8, "delay": 1.0, "fade": 0.9},
-            {"text": "O K U R A N O", "y": 0.63, "size": 24, "weight": "extralight",
-             "color": (200, 180, 140, 130), "spacing": 6, "delay": 1.6, "fade": 0.8},
+            {"text": "ミシュランガイド京都・大阪掲載", "y": 0.30, "size": 26, "weight": "light",
+             "color": (220, 195, 145, 190), "spacing": 6, "delay": 0.2, "fade": 0.8},
+            {"text": "北新地  大嵓埜", "y": 0.37, "size": 130, "weight": "black",
+             "color": (200, 170, 120), "spacing": 20, "delay": 0.4, "fade": 1.0},
+            {"text": "北新地FOODEARビル 3F", "y": 0.52, "size": 28, "weight": "light",
+             "color": (245, 240, 232, 155), "spacing": 4, "delay": 1.2, "fade": 0.8},
+            {"text": "JR北新地駅  徒歩2分", "y": 0.57, "size": 28, "weight": "light",
+             "color": (245, 240, 232, 155), "spacing": 4, "delay": 1.5, "fade": 0.8},
+            {"text": "TEL  06-6341-3535", "y": 0.64, "size": 32, "weight": "medium",
+             "color": (245, 240, 232, 180), "spacing": 4, "delay": 1.9, "fade": 0.8},
+            {"text": "ご予約承ります", "y": 0.72, "size": 34, "weight": "light",
+             "color": (200, 185, 150, 160), "spacing": 8, "delay": 2.3, "fade": 0.8},
         ],
-        "line": {"y": 0.52, "width": 120, "delay": 0.8, "fade": 1.2},
+        "line": {"y": 0.49, "width": 120, "delay": 1.0, "fade": 1.2},
     },
 ]
 
