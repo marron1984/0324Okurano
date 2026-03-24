@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>大嵓埜 - Instagram Reel</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200;300;400;500;600&family=Zen+Old+Mincho:wght@400;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Zen Old Mincho', 'Noto Serif JP', serif;
+      overflow: hidden;
+    }
+
+    /* === Reel Frame (9:16 = 1080x1920) === */
+    .reel-frame {
+      position: relative;
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background: #0a0806;
+      transform-origin: center center;
+    }
+
+    /* Auto-scale to fit viewport */
+    @media (max-height: 1920px) {
+      .reel-frame {
+        transform: scale(calc(100vh / 1920));
+      }
+    }
+    @media (max-width: 1080px) {
+      .reel-frame {
+        transform: scale(min(calc(100vw / 1080), calc(100vh / 1920)));
+      }
+    }
+
+    /* === Slide system === */
+    .slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .slide.active {
+      opacity: 1;
+      z-index: 2;
+    }
+
+    /* === Photo layer with Ken Burns === */
+    .slide-photo {
+      position: absolute;
+      inset: -8%;
+      width: 116%;
+      height: 116%;
+      background-size: cover;
+      background-position: center;
+      filter: brightness(0.75) contrast(1.05) saturate(1.08);
+    }
+
+    /* Organic Ken Burns - each slide has unique movement */
+    .slide.active .kb-1 {
+      animation: kenBurns1 7s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+    }
+    .slide.active .kb-2 {
+      animation: kenBurns2 6.5s cubic-bezier(0.22, 0.12, 0.28, 1) forwards;
+    }
+    .slide.active .kb-3 {
+      animation: kenBurns3 7.2s cubic-bezier(0.24, 0.08, 0.26, 1) forwards;
+    }
+    .slide.active .kb-4 {
+      animation: kenBurns4 6.8s cubic-bezier(0.23, 0.11, 0.27, 1) forwards;
+    }
+    .slide.active .kb-5 {
+      animation: kenBurns5 7s cubic-bezier(0.25, 0.09, 0.25, 1) forwards;
+    }
+    .slide.active .kb-6 {
+      animation: kenBurns6 5.5s cubic-bezier(0.22, 0.1, 0.28, 1) forwards;
+    }
+
+    /* Intentionally asymmetric, non-uniform keyframes to feel hand-edited */
+    @keyframes kenBurns1 {
+      0%   { transform: scale(1.0) translate(0%, 2%); }
+      100% { transform: scale(1.08) translate(-1.5%, -1%); }
+    }
+    @keyframes kenBurns2 {
+      0%   { transform: scale(1.06) translate(1%, -1%); }
+      100% { transform: scale(1.0) translate(-0.5%, 1.5%); }
+    }
+    @keyframes kenBurns3 {
+      0%   { transform: scale(1.0) translate(-1%, 0%); }
+      100% { transform: scale(1.07) translate(1%, -2%); }
+    }
+    @keyframes kenBurns4 {
+      0%   { transform: scale(1.05) translate(0.5%, 1%); }
+      100% { transform: scale(1.0) translate(-1%, -0.5%); }
+    }
+    @keyframes kenBurns5 {
+      0%   { transform: scale(1.0) translate(0%, 0%); }
+      100% { transform: scale(1.06) translate(-0.8%, -1.2%); }
+    }
+    @keyframes kenBurns6 {
+      0%   { transform: scale(1.04) translate(0.5%, -0.5%); }
+      100% { transform: scale(1.0) translate(0%, 0%); }
+    }
+
+    /* === Organic overlays === */
+
+    /* Film grain - subtle, avoids AI-clean look */
+    .grain-overlay {
+      position: absolute;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      z-index: 90;
+      pointer-events: none;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      animation: grainDrift 0.8s steps(4) infinite;
+    }
+
+    @keyframes grainDrift {
+      0%   { transform: translate(0, 0); }
+      25%  { transform: translate(-2%, 3%); }
+      50%  { transform: translate(1%, -2%); }
+      75%  { transform: translate(3%, 1%); }
+      100% { transform: translate(-1%, -1%); }
+    }
+
+    /* Vignette - natural lens darkening */
+    .vignette {
+      position: absolute;
+      inset: 0;
+      z-index: 80;
+      pointer-events: none;
+      background: radial-gradient(
+        ellipse 65% 60% at 50% 48%,
+        transparent 0%,
+        rgba(8, 6, 4, 0.15) 60%,
+        rgba(8, 6, 4, 0.5) 100%
+      );
+    }
+
+    /* Warm light leak - asymmetric, natural */
+    .light-leak {
+      position: absolute;
+      inset: 0;
+      z-index: 75;
+      pointer-events: none;
+      opacity: 0;
+    }
+    .slide.active .light-leak {
+      animation: leakPulse 7s ease-in-out forwards;
+    }
+    @keyframes leakPulse {
+      0%   { opacity: 0; }
+      30%  { opacity: 0.06; }
+      70%  { opacity: 0.03; }
+      100% { opacity: 0; }
+    }
+    .leak-warm {
+      background: linear-gradient(
+        135deg,
+        rgba(200, 160, 80, 0.15) 0%,
+        transparent 40%,
+        transparent 100%
+      );
+    }
+    .leak-cool {
+      background: linear-gradient(
+        -45deg,
+        transparent 0%,
+        transparent 60%,
+        rgba(180, 160, 140, 0.08) 100%
+      );
+    }
+
+    /* === Text styling - handcrafted feel === */
+    .text-layer {
+      position: absolute;
+      z-index: 50;
+      pointer-events: none;
+    }
+
+    /* Slight imperfection in text positioning */
+    .text-main {
+      font-family: 'Zen Old Mincho', serif;
+      color: #f5f0e8;
+      text-shadow:
+        0 1px 3px rgba(0,0,0,0.6),
+        0 0 20px rgba(0,0,0,0.3);
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    .slide.active .text-main {
+      animation: textReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Each text element has slightly different timing - not robotic */
+    .text-delay-1 { animation-delay: 0.6s !important; }
+    .text-delay-2 { animation-delay: 1.1s !important; }
+    .text-delay-3 { animation-delay: 1.5s !important; }
+    .text-delay-4 { animation-delay: 0.4s !important; }
+
+    @keyframes textReveal {
+      0%   { opacity: 0; transform: translateY(12px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Subtle line animation */
+    .deco-line-h {
+      height: 1px;
+      background: rgba(200, 180, 140, 0.4);
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+    .slide.active .deco-line-h {
+      animation: lineGrow 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .line-delay-1 { animation-delay: 0.9s !important; }
+    .line-delay-2 { animation-delay: 1.3s !important; }
+
+    @keyframes lineGrow {
+      0%   { transform: scaleX(0); opacity: 0; }
+      100% { transform: scaleX(1); opacity: 1; }
+    }
+
+    /* === Transitions between slides === */
+    .slide {
+      transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* === Slide-specific layouts === */
+
+    /* Slide 1: Hook - dramatic opening */
+    #slide1 .slide-photo {
+      background-image: url('イメージ_接客0014.JPG');
+      background-position: center 35%;
+    }
+    #slide1 .text-layer {
+      bottom: 280px;
+      left: 80px;
+      right: 80px;
+    }
+    #slide1 .hook-text {
+      font-size: 72px;
+      font-weight: 600;
+      letter-spacing: 18px;
+      line-height: 1.4;
+      color: #f5f0e8;
+    }
+    #slide1 .hook-sub {
+      font-size: 26px;
+      font-weight: 200;
+      letter-spacing: 8px;
+      margin-top: 24px;
+      color: rgba(245, 240, 232, 0.7);
+    }
+
+    /* Slide 2: Atmosphere */
+    #slide2 .slide-photo {
+      background-image: url('イメージ_接客0015.JPG');
+      background-position: center 40%;
+    }
+    #slide2 .text-layer {
+      top: 200px;
+      right: 80px;
+      text-align: right;
+    }
+    #slide2 .atm-text {
+      font-size: 44px;
+      font-weight: 400;
+      letter-spacing: 12px;
+      writing-mode: vertical-rl;
+      line-height: 2.2;
+      color: rgba(245, 240, 232, 0.9);
+      display: inline-block;
+    }
+
+    /* Slide 3: Cuisine 1 */
+    #slide3 .slide-photo {
+      background-image: url('イメージ_お食事シーン0035.JPG');
+      background-position: center center;
+    }
+    #slide3 .text-layer {
+      bottom: 320px;
+      left: 80px;
+      right: 80px;
+    }
+    #slide3 .cuisine-label {
+      font-size: 18px;
+      font-weight: 200;
+      letter-spacing: 10px;
+      color: rgba(200, 180, 140, 0.8);
+      text-transform: uppercase;
+    }
+    #slide3 .cuisine-title {
+      font-size: 52px;
+      font-weight: 400;
+      letter-spacing: 14px;
+      margin-top: 16px;
+    }
+    #slide3 .cuisine-desc {
+      font-size: 22px;
+      font-weight: 200;
+      letter-spacing: 4px;
+      margin-top: 20px;
+      color: rgba(245, 240, 232, 0.65);
+      line-height: 1.8;
+    }
+
+    /* Slide 4: Cuisine 2 */
+    #slide4 .slide-photo {
+      background-image: url('イメージ_お食事シーン0058.JPG');
+      background-position: center center;
+    }
+    #slide4 .text-layer {
+      top: 180px;
+      left: 80px;
+      right: 80px;
+      text-align: center;
+    }
+    #slide4 .detail-text {
+      font-size: 36px;
+      font-weight: 300;
+      letter-spacing: 10px;
+      line-height: 2;
+    }
+
+    /* Slide 5: Cuisine 3 */
+    #slide5 .slide-photo {
+      background-image: url('イメージ_お食事シーン0083.JPG');
+      background-position: center center;
+    }
+    #slide5 .text-layer {
+      bottom: 360px;
+      left: 80px;
+      right: 80px;
+    }
+    #slide5 .moment-text {
+      font-size: 40px;
+      font-weight: 300;
+      letter-spacing: 8px;
+      line-height: 1.8;
+    }
+    #slide5 .moment-sub {
+      font-size: 20px;
+      font-weight: 200;
+      letter-spacing: 6px;
+      color: rgba(245, 240, 232, 0.55);
+      margin-top: 20px;
+    }
+
+    /* Slide 6: Closing - loops back to hook */
+    #slide6 .slide-photo {
+      background-image: url('イメージ_接客0014.JPG');
+      background-position: center 30%;
+      filter: brightness(0.55) contrast(1.1) saturate(0.95);
+    }
+    #slide6 .text-layer {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      width: 80%;
+    }
+    #slide6 .closing-logo {
+      font-size: 96px;
+      font-weight: 700;
+      letter-spacing: 24px;
+      color: #c8aa78;
+      text-shadow:
+        0 2px 8px rgba(0,0,0,0.5),
+        0 0 60px rgba(200,170,120,0.15);
+    }
+    #slide6 .closing-tagline {
+      font-size: 22px;
+      font-weight: 200;
+      letter-spacing: 8px;
+      margin-top: 36px;
+      color: rgba(245, 240, 232, 0.6);
+    }
+    #slide6 .closing-cta {
+      font-size: 16px;
+      font-weight: 300;
+      letter-spacing: 5px;
+      margin-top: 60px;
+      color: rgba(200, 180, 140, 0.5);
+    }
+
+    /* === Progress indicator === */
+    .progress-container {
+      position: absolute;
+      top: 56px;
+      left: 40px;
+      right: 40px;
+      display: flex;
+      gap: 6px;
+      z-index: 100;
+    }
+    .progress-seg {
+      flex: 1;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 1px;
+      overflow: hidden;
+    }
+    .progress-seg .fill {
+      height: 100%;
+      width: 0%;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 1px;
+    }
+    .progress-seg.done .fill { width: 100%; }
+    .progress-seg.active .fill {
+      animation: progressFill var(--slide-duration) linear forwards;
+    }
+    @keyframes progressFill {
+      from { width: 0%; }
+      to { width: 100%; }
+    }
+
+    /* === Play overlay === */
+    .play-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 200;
+      background: rgba(10, 8, 6, 0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      cursor: pointer;
+      transition: opacity 0.8s ease;
+    }
+    .play-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .play-overlay .ov-title {
+      font-size: 56px;
+      font-weight: 700;
+      color: #c8aa78;
+      letter-spacing: 16px;
+      margin-bottom: 40px;
+    }
+    .play-btn-ring {
+      width: 88px;
+      height: 88px;
+      border: 1.5px solid rgba(200, 170, 120, 0.5);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: ringPulse 3s ease-in-out infinite;
+    }
+    @keyframes ringPulse {
+      0%, 100% { transform: scale(1); border-color: rgba(200,170,120,0.5); }
+      50% { transform: scale(1.06); border-color: rgba(200,170,120,0.3); }
+    }
+    .play-btn-ring svg { fill: #c8aa78; margin-left: 4px; }
+    .play-overlay .ov-hint {
+      margin-top: 32px;
+      font-size: 13px;
+      letter-spacing: 4px;
+      color: rgba(200, 180, 140, 0.35);
+      font-weight: 200;
+    }
+
+    /* === Controls info === */
+    .controls-hint {
+      position: absolute;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 95;
+      font-size: 13px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.15);
+      font-weight: 200;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+<div class="reel-frame" id="reelFrame">
+
+  <!-- Play overlay -->
+  <div class="play-overlay" id="playOverlay">
+    <div class="ov-title">大嵓埜</div>
+    <div class="play-btn-ring">
+      <svg width="22" height="26" viewBox="0 0 22 26"><polygon points="0,0 22,13 0,26"/></svg>
+    </div>
+    <p class="ov-hint">TAP TO PLAY</p>
+  </div>
+
+  <!-- Progress bars (Instagram story style) -->
+  <div class="progress-container" id="progressContainer"></div>
+
+  <!-- Global overlays -->
+  <div class="grain-overlay"></div>
+  <div class="vignette"></div>
+
+  <!-- Slide 1: Hook -->
+  <div class="slide" id="slide1">
+    <div class="slide-photo kb-1"></div>
+    <div class="light-leak leak-warm"></div>
+    <div class="text-layer">
+      <div class="text-main hook-text text-delay-4">大嵓埜</div>
+      <div class="deco-line-h line-delay-1" style="width:120px; margin-top:20px;"></div>
+      <div class="text-main hook-sub text-delay-2">心をつなぐ、至福のひととき</div>
+    </div>
+  </div>
+
+  <!-- Slide 2: Atmosphere -->
+  <div class="slide" id="slide2">
+    <div class="slide-photo kb-2"></div>
+    <div class="light-leak leak-cool"></div>
+    <div class="text-layer">
+      <div class="text-main atm-text text-delay-1">一期一会のおもてなし</div>
+    </div>
+  </div>
+
+  <!-- Slide 3: Cuisine 1 -->
+  <div class="slide" id="slide3">
+    <div class="slide-photo kb-3"></div>
+    <div class="light-leak leak-warm"></div>
+    <div class="text-layer">
+      <div class="text-main cuisine-label text-delay-1">CUISINE</div>
+      <div class="deco-line-h line-delay-1" style="width:60px; margin-top:12px;"></div>
+      <div class="text-main cuisine-title text-delay-2">旬の懐石</div>
+      <div class="text-main cuisine-desc text-delay-3">素材の声に耳を澄ませ<br>一皿に季節を映す</div>
+    </div>
+  </div>
+
+  <!-- Slide 4: Cuisine 2 -->
+  <div class="slide" id="slide4">
+    <div class="slide-photo kb-4"></div>
+    <div class="light-leak leak-cool"></div>
+    <div class="text-layer">
+      <div class="text-main detail-text text-delay-1">丁寧に、ひとつずつ</div>
+    </div>
+  </div>
+
+  <!-- Slide 5: Cuisine 3 -->
+  <div class="slide" id="slide5">
+    <div class="slide-photo kb-5"></div>
+    <div class="light-leak leak-warm"></div>
+    <div class="text-layer">
+      <div class="text-main moment-text text-delay-1">特別な日の、<br>特別な一皿</div>
+      <div class="deco-line-h line-delay-2" style="width:80px; margin-top:16px;"></div>
+      <div class="text-main moment-sub text-delay-3">大切な方と過ごす時間</div>
+    </div>
+  </div>
+
+  <!-- Slide 6: Closing (CTA / Loop point) -->
+  <div class="slide" id="slide6">
+    <div class="slide-photo kb-6"></div>
+    <div class="light-leak leak-warm"></div>
+    <div class="text-layer">
+      <div class="text-main closing-logo text-delay-4">大嵓埜</div>
+      <div class="text-main closing-tagline text-delay-2">ご予約承ります</div>
+      <div class="text-main closing-cta text-delay-3">OKURANO</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // === Configuration ===
+  const SLIDE_DURATIONS = [4200, 4800, 5200, 4000, 5000, 4500]; // ms - intentionally varied
+  const TOTAL_SLIDES = 6;
+  const LOOP = true;
+
+  let currentSlide = 0;
+  let isPlaying = false;
+  let slideTimer = null;
+
+  // === Build progress segments ===
+  const progressContainer = document.getElementById('progressContainer');
+  for (let i = 0; i < TOTAL_SLIDES; i++) {
+    const seg = document.createElement('div');
+    seg.className = 'progress-seg';
+    seg.innerHTML = '<div class="fill"></div>';
+    progressContainer.appendChild(seg);
+  }
+
+  // === Slight timing jitter to feel organic ===
+  function jitter(base) {
+    // ±5% random variation
+    return base + (Math.random() - 0.5) * base * 0.1;
+  }
+
+  // === Go to slide ===
+  function goToSlide(index) {
+    if (index < 0) return;
+    if (index >= TOTAL_SLIDES) {
+      if (LOOP) {
+        index = 0;
+        // Reset all progress bars for loop
+        document.querySelectorAll('.progress-seg').forEach(s => {
+          s.classList.remove('done', 'active');
+          s.querySelector('.fill').style.width = '0%';
+        });
+      } else {
+        isPlaying = false;
+        return;
+      }
+    }
+
+    // Update slides
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    document.getElementById(`slide${index + 1}`).classList.add('active');
+
+    // Update progress
+    const segs = document.querySelectorAll('.progress-seg');
+    segs.forEach((seg, i) => {
+      seg.classList.remove('active');
+      if (i < index) {
+        seg.classList.add('done');
+        seg.querySelector('.fill').style.width = '100%';
+      } else if (i === index) {
+        seg.classList.add('active');
+        seg.style.setProperty('--slide-duration', SLIDE_DURATIONS[i] + 'ms');
+        // Reset fill animation
+        const fill = seg.querySelector('.fill');
+        fill.style.animation = 'none';
+        fill.offsetHeight; // Force reflow
+        fill.style.animation = '';
+      } else if (i > index) {
+        seg.classList.remove('done');
+        seg.querySelector('.fill').style.width = '0%';
+      }
+    });
+
+    currentSlide = index;
+
+    // Schedule next slide with organic timing
+    clearTimeout(slideTimer);
+    if (isPlaying) {
+      slideTimer = setTimeout(() => goToSlide(currentSlide + 1), jitter(SLIDE_DURATIONS[currentSlide]));
+    }
+  }
+
+  // === Play overlay ===
+  document.getElementById('playOverlay').addEventListener('click', () => {
+    document.getElementById('playOverlay').classList.add('hidden');
+    isPlaying = true;
+    goToSlide(0);
+  });
+
+  // === Touch/click navigation (tap left/right halves) ===
+  document.getElementById('reelFrame').addEventListener('click', (e) => {
+    if (!isPlaying) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const third = rect.width / 3;
+
+    if (x < third) {
+      // Tap left: go back
+      goToSlide(Math.max(0, currentSlide - 1));
+    } else if (x > third * 2) {
+      // Tap right: go forward
+      goToSlide(currentSlide + 1);
+    }
+    // Middle third: pause/resume
+    else {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        slideTimer = setTimeout(() => goToSlide(currentSlide + 1), jitter(SLIDE_DURATIONS[currentSlide] / 2));
+      } else {
+        clearTimeout(slideTimer);
+      }
+    }
+  });
+
+  // === Keyboard controls ===
+  document.addEventListener('keydown', (e) => {
+    if (!isPlaying && e.key !== 'Enter') return;
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault();
+      goToSlide(currentSlide + 1);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      goToSlide(Math.max(0, currentSlide - 1));
+    } else if (e.key === 'Enter') {
+      if (!isPlaying) {
+        document.getElementById('playOverlay').click();
+      }
+    }
+  });
+
+  // === Prevent context menu on long press ===
+  document.addEventListener('contextmenu', e => e.preventDefault());
+</script>
+</body>
+</html>
