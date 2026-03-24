@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>大嵓埜 - おもてなし</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0a0a;
+      color: #e8e0d4;
+      font-family: 'Noto Serif JP', serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* --- Full-screen scene container --- */
+    .scene {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1.2s ease;
+      z-index: 1;
+    }
+    .scene.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* --- Background layers --- */
+    .bg-gradient {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      transition: background 2s ease;
+    }
+
+    /* --- Particle canvas --- */
+    #particles {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* --- Scene 1: Opening --- */
+    #scene1 .logo-circle {
+      width: 200px;
+      height: 200px;
+      border: 2px solid rgba(200, 170, 120, 0.6);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: breathe 4s ease-in-out infinite;
+    }
+    #scene1 .logo-text {
+      font-size: 3.5rem;
+      font-weight: 700;
+      letter-spacing: 0.5rem;
+      color: #c8aa78;
+      text-shadow: 0 0 40px rgba(200, 170, 120, 0.3);
+    }
+    #scene1 .tagline {
+      margin-top: 2rem;
+      font-size: 1.1rem;
+      font-weight: 300;
+      letter-spacing: 0.8rem;
+      color: rgba(232, 224, 212, 0.6);
+      animation: fadeSlideUp 1.5s ease 0.8s both;
+    }
+
+    /* --- Scene 2: Philosophy --- */
+    #scene2 .vertical-text {
+      writing-mode: vertical-rl;
+      font-size: 2rem;
+      font-weight: 300;
+      letter-spacing: 1rem;
+      line-height: 3;
+      color: #c8aa78;
+      animation: fadeSlideUp 1.5s ease both;
+    }
+    #scene2 .sub-text {
+      margin-top: 3rem;
+      font-size: 0.95rem;
+      font-weight: 300;
+      letter-spacing: 0.3rem;
+      color: rgba(232, 224, 212, 0.5);
+      animation: fadeSlideUp 1.5s ease 0.6s both;
+    }
+
+    /* --- Scene 3: Seasons --- */
+    #scene3 .seasons-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      max-width: 900px;
+      padding: 0 2rem;
+    }
+    .season-card {
+      text-align: center;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    .season-card.visible {
+      animation: fadeSlideUp 0.8s ease forwards;
+    }
+    .season-card .season-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    .season-card .season-name {
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: #c8aa78;
+      margin-bottom: 0.5rem;
+    }
+    .season-card .season-desc {
+      font-size: 0.85rem;
+      font-weight: 300;
+      line-height: 1.8;
+      color: rgba(232, 224, 212, 0.6);
+    }
+    #scene3 .scene-title {
+      font-size: 1.8rem;
+      font-weight: 300;
+      letter-spacing: 0.6rem;
+      color: #c8aa78;
+      margin-bottom: 3rem;
+      animation: fadeSlideUp 1s ease both;
+    }
+
+    /* --- Scene 4: Cuisine --- */
+    #scene4 .dish-showcase {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+    #scene4 .dish-title {
+      font-size: 2.5rem;
+      font-weight: 300;
+      letter-spacing: 1rem;
+      color: #c8aa78;
+      animation: fadeSlideUp 1s ease both;
+    }
+    #scene4 .dish-items {
+      display: flex;
+      gap: 3rem;
+      margin-top: 1rem;
+    }
+    .dish-item {
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .dish-item.visible {
+      animation: fadeSlideUp 0.8s ease forwards;
+    }
+    .dish-item .dish-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.8rem;
+    }
+    .dish-item .dish-name {
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: #e8e0d4;
+      margin-bottom: 0.3rem;
+    }
+    .dish-item .dish-detail {
+      font-size: 0.8rem;
+      font-weight: 300;
+      color: rgba(232, 224, 212, 0.5);
+    }
+    #scene4 .cuisine-note {
+      margin-top: 2.5rem;
+      font-size: 0.9rem;
+      font-weight: 300;
+      letter-spacing: 0.3rem;
+      color: rgba(232, 224, 212, 0.4);
+      animation: fadeSlideUp 1.5s ease 1.5s both;
+    }
+
+    /* --- Scene 5: Space / Ambience --- */
+    #scene5 .space-content {
+      text-align: center;
+    }
+    #scene5 .space-title {
+      font-size: 2rem;
+      font-weight: 300;
+      letter-spacing: 0.8rem;
+      color: #c8aa78;
+      margin-bottom: 2rem;
+      animation: fadeSlideUp 1s ease both;
+    }
+    #scene5 .space-features {
+      display: flex;
+      gap: 4rem;
+      margin-bottom: 2rem;
+    }
+    .space-feature {
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .space-feature.visible {
+      animation: fadeSlideUp 0.8s ease forwards;
+    }
+    .space-feature .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.8rem;
+    }
+    .space-feature .feature-name {
+      font-size: 1rem;
+      font-weight: 400;
+      color: #e8e0d4;
+      margin-bottom: 0.3rem;
+    }
+    .space-feature .feature-desc {
+      font-size: 0.8rem;
+      font-weight: 300;
+      color: rgba(232, 224, 212, 0.5);
+    }
+
+    /* --- Scene 6: Closing --- */
+    #scene6 .closing-content {
+      text-align: center;
+    }
+    #scene6 .closing-main {
+      font-size: 2.8rem;
+      font-weight: 300;
+      letter-spacing: 1.2rem;
+      color: #c8aa78;
+      animation: fadeSlideUp 1.5s ease both;
+      margin-bottom: 1.5rem;
+    }
+    #scene6 .closing-sub {
+      font-size: 1rem;
+      font-weight: 300;
+      letter-spacing: 0.5rem;
+      color: rgba(232, 224, 212, 0.5);
+      animation: fadeSlideUp 1.5s ease 0.6s both;
+      margin-bottom: 3rem;
+    }
+    #scene6 .closing-logo {
+      font-size: 4rem;
+      font-weight: 700;
+      color: #c8aa78;
+      text-shadow: 0 0 60px rgba(200, 170, 120, 0.4);
+      animation: breathe 4s ease-in-out infinite;
+    }
+    #scene6 .closing-tagline {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      font-weight: 300;
+      letter-spacing: 0.6rem;
+      color: rgba(232, 224, 212, 0.4);
+      animation: fadeSlideUp 1.5s ease 1.2s both;
+    }
+
+    /* --- Progress bar --- */
+    .progress-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #c8aa78, #e8d5b0);
+      z-index: 100;
+      transition: width 0.3s ease;
+    }
+
+    /* --- Navigation dots --- */
+    .nav-dots {
+      position: fixed;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .nav-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1px solid rgba(200, 170, 120, 0.4);
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .nav-dot.active {
+      background: #c8aa78;
+      border-color: #c8aa78;
+      box-shadow: 0 0 10px rgba(200, 170, 120, 0.4);
+    }
+
+    /* --- Decorative line --- */
+    .deco-line {
+      width: 60px;
+      height: 1px;
+      background: rgba(200, 170, 120, 0.3);
+      margin: 2rem auto;
+    }
+
+    /* --- Play button overlay --- */
+    .play-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: #0a0a0a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      cursor: pointer;
+      transition: opacity 1s ease;
+    }
+    .play-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .play-overlay .play-label {
+      font-size: 1.2rem;
+      font-weight: 300;
+      letter-spacing: 0.5rem;
+      color: rgba(200, 170, 120, 0.7);
+      margin-bottom: 2rem;
+    }
+    .play-btn {
+      width: 80px;
+      height: 80px;
+      border: 1px solid rgba(200, 170, 120, 0.5);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: breathe 3s ease-in-out infinite;
+    }
+    .play-btn svg {
+      fill: #c8aa78;
+      margin-left: 4px;
+    }
+
+    /* --- Animations --- */
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.85; }
+    }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 768px) {
+      #scene1 .logo-text { font-size: 2.5rem; }
+      #scene1 .logo-circle { width: 150px; height: 150px; }
+      #scene3 .seasons-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+      #scene4 .dish-items { flex-wrap: wrap; justify-content: center; }
+      #scene5 .space-features { flex-wrap: wrap; justify-content: center; gap: 2rem; }
+      .nav-dots { right: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Play overlay -->
+  <div class="play-overlay" id="playOverlay">
+    <div class="play-label">大嵓埜</div>
+    <div class="play-btn">
+      <svg width="24" height="28" viewBox="0 0 24 28">
+        <polygon points="0,0 24,14 0,28"/>
+      </svg>
+    </div>
+    <p style="margin-top:2rem; font-size:0.75rem; letter-spacing:0.3rem; color:rgba(232,224,212,0.3);">CLICK TO START</p>
+  </div>
+
+  <!-- Background -->
+  <div class="bg-gradient" id="bgGradient"></div>
+  <canvas id="particles"></canvas>
+
+  <!-- Progress bar -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- Navigation dots -->
+  <div class="nav-dots" id="navDots"></div>
+
+  <!-- Scene 1: Opening -->
+  <div class="scene" id="scene1">
+    <div class="logo-circle">
+      <span class="logo-text">大嵓埜</span>
+    </div>
+    <div class="deco-line"></div>
+    <p class="tagline">心をつなぐ、至福のひととき</p>
+  </div>
+
+  <!-- Scene 2: Philosophy -->
+  <div class="scene" id="scene2">
+    <div class="vertical-text">一期一会のおもてなし</div>
+    <div class="deco-line"></div>
+    <p class="sub-text">お客様との出逢いを大切に、真心を込めた接待を</p>
+  </div>
+
+  <!-- Scene 3: Seasons -->
+  <div class="scene" id="scene3">
+    <h2 class="scene-title">四季の彩り</h2>
+    <div class="seasons-grid">
+      <div class="season-card" data-delay="0">
+        <div class="season-icon">🌸</div>
+        <div class="season-name">春</div>
+        <div class="season-desc">桜鯛・筍<br>春の息吹を味わう</div>
+      </div>
+      <div class="season-card" data-delay="200">
+        <div class="season-icon">🍃</div>
+        <div class="season-name">夏</div>
+        <div class="season-desc">鮎・鱧<br>涼やかな夏の膳</div>
+      </div>
+      <div class="season-card" data-delay="400">
+        <div class="season-icon">🍁</div>
+        <div class="season-name">秋</div>
+        <div class="season-desc">松茸・秋刀魚<br>実りの秋を堪能</div>
+      </div>
+      <div class="season-card" data-delay="600">
+        <div class="season-icon">❄️</div>
+        <div class="season-name">冬</div>
+        <div class="season-desc">河豚・蟹<br>温もりの冬料理</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 4: Cuisine -->
+  <div class="scene" id="scene4">
+    <div class="dish-showcase">
+      <h2 class="dish-title">料理</h2>
+      <div class="deco-line"></div>
+      <div class="dish-items">
+        <div class="dish-item" data-delay="0">
+          <div class="dish-icon">🍶</div>
+          <div class="dish-name">先付</div>
+          <div class="dish-detail">季節の前菜</div>
+        </div>
+        <div class="dish-item" data-delay="200">
+          <div class="dish-icon">🍣</div>
+          <div class="dish-name">造り</div>
+          <div class="dish-detail">厳選された鮮魚</div>
+        </div>
+        <div class="dish-item" data-delay="400">
+          <div class="dish-icon">🫕</div>
+          <div class="dish-name">煮物椀</div>
+          <div class="dish-detail">出汁の真髄</div>
+        </div>
+        <div class="dish-item" data-delay="600">
+          <div class="dish-icon">🔥</div>
+          <div class="dish-name">焼物</div>
+          <div class="dish-detail">炭火の妙技</div>
+        </div>
+        <div class="dish-item" data-delay="800">
+          <div class="dish-icon">🍚</div>
+          <div class="dish-name">食事</div>
+          <div class="dish-detail">土鍋炊き御飯</div>
+        </div>
+      </div>
+      <p class="cuisine-note">― 素材の味を活かした、繊細な懐石料理 ―</p>
+    </div>
+  </div>
+
+  <!-- Scene 5: Space -->
+  <div class="scene" id="scene5">
+    <div class="space-content">
+      <h2 class="space-title">空間</h2>
+      <div class="deco-line"></div>
+      <div class="space-features">
+        <div class="space-feature" data-delay="0">
+          <div class="feature-icon">🏯</div>
+          <div class="feature-name">完全個室</div>
+          <div class="feature-desc">2名様〜最大20名様</div>
+        </div>
+        <div class="space-feature" data-delay="300">
+          <div class="feature-icon">🎋</div>
+          <div class="feature-name">日本庭園</div>
+          <div class="feature-desc">四季折々の風情</div>
+        </div>
+        <div class="space-feature" data-delay="600">
+          <div class="feature-icon">🍵</div>
+          <div class="feature-name">茶室</div>
+          <div class="feature-desc">静寂のひととき</div>
+        </div>
+        <div class="space-feature" data-delay="900">
+          <div class="feature-icon">🌙</div>
+          <div class="feature-name">カウンター</div>
+          <div class="feature-desc">料理人との対話</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 6: Closing -->
+  <div class="scene" id="scene6">
+    <div class="closing-content">
+      <p class="closing-sub">大切なお客様を、大切な場所で</p>
+      <div class="deco-line"></div>
+      <div class="closing-logo">大嵓埜</div>
+      <div class="deco-line"></div>
+      <p class="closing-tagline">皆様のお越しを心よりお待ち申し上げます</p>
+    </div>
+  </div>
+
+  <script>
+    // --- Configuration ---
+    const SCENE_DURATION = 6000; // ms per scene
+    const TOTAL_SCENES = 6;
+    let currentScene = 0;
+    let isPlaying = false;
+    let timer = null;
+
+    // --- Background gradients per scene ---
+    const gradients = [
+      'radial-gradient(ellipse at center, #1a1510 0%, #0a0a0a 70%)',
+      'radial-gradient(ellipse at center, #15120e 0%, #0a0a0a 70%)',
+      'radial-gradient(ellipse at center, #12150e 0%, #0a0a0a 70%)',
+      'radial-gradient(ellipse at center, #15100e 0%, #0a0a0a 70%)',
+      'radial-gradient(ellipse at center, #0e1215 0%, #0a0a0a 70%)',
+      'radial-gradient(ellipse at center, #1a1510 0%, #0a0a0a 70%)',
+    ];
+
+    // --- Particle system ---
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedY = -(Math.random() * 0.3 + 0.1);
+        this.speedX = (Math.random() - 0.5) * 0.2;
+        this.opacity = Math.random() * 0.3 + 0.1;
+        this.life = Math.random() * 200 + 100;
+        this.maxLife = this.life;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.life--;
+        if (this.life <= 0 || this.y < -10) this.reset();
+      }
+      draw() {
+        const alpha = this.opacity * (this.life / this.maxLife);
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200, 170, 120, ${alpha})`;
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 60; i++) {
+      particles.push(new Particle());
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // --- Navigation dots ---
+    const navDotsContainer = document.getElementById('navDots');
+    for (let i = 0; i < TOTAL_SCENES; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'nav-dot';
+      dot.addEventListener('click', () => goToScene(i));
+      navDotsContainer.appendChild(dot);
+    }
+
+    // --- Scene management ---
+    function goToScene(index) {
+      if (index < 0 || index >= TOTAL_SCENES) return;
+
+      // Hide current scene
+      const scenes = document.querySelectorAll('.scene');
+      scenes.forEach(s => s.classList.remove('active'));
+
+      // Show new scene
+      currentScene = index;
+      scenes[currentScene].classList.add('active');
+
+      // Update background
+      document.getElementById('bgGradient').style.background = gradients[currentScene];
+
+      // Update progress bar
+      const progress = ((currentScene + 1) / TOTAL_SCENES) * 100;
+      document.getElementById('progressBar').style.width = progress + '%';
+
+      // Update nav dots
+      document.querySelectorAll('.nav-dot').forEach((d, i) => {
+        d.classList.toggle('active', i === currentScene);
+      });
+
+      // Animate cards/items in current scene
+      animateSceneElements(currentScene);
+
+      // Reset timer
+      if (isPlaying) {
+        clearTimeout(timer);
+        timer = setTimeout(nextScene, SCENE_DURATION);
+      }
+    }
+
+    function animateSceneElements(sceneIndex) {
+      const scene = document.querySelectorAll('.scene')[sceneIndex];
+      const items = scene.querySelectorAll('.season-card, .dish-item, .space-feature');
+      items.forEach(item => {
+        item.classList.remove('visible');
+        const delay = parseInt(item.dataset.delay || 0);
+        setTimeout(() => item.classList.add('visible'), delay + 300);
+      });
+    }
+
+    function nextScene() {
+      if (currentScene < TOTAL_SCENES - 1) {
+        goToScene(currentScene + 1);
+      } else {
+        // Loop back or stop
+        isPlaying = false;
+      }
+    }
+
+    // --- Play overlay ---
+    document.getElementById('playOverlay').addEventListener('click', () => {
+      document.getElementById('playOverlay').classList.add('hidden');
+      isPlaying = true;
+      goToScene(0);
+      timer = setTimeout(nextScene, SCENE_DURATION);
+    });
+
+    // --- Keyboard controls ---
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        goToScene(currentScene + 1);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        goToScene(currentScene - 1);
+      } else if (e.key === 'Escape') {
+        isPlaying = false;
+        clearTimeout(timer);
+      }
+    });
+  </script>
+</body>
+</html>
